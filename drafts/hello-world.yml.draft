@@ -1,0 +1,11 @@
+name: Synthetic Hello World
+on:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  hello:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Greeting
+        run: echo 'Hello from the issue-driven demo'
