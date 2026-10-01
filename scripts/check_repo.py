@@ -17,11 +17,13 @@ from issue_agent.contracts import (  # noqa: E402
     commit_sha, validate_draft, validate_review,
 )
 from issue_agent.evidence import verify_bundle  # noqa: E402
+from issue_agent.enterprise import parse_policy, parse_requests, read_fixture  # noqa: E402
 
 REQUIRED = (
     "README.md", "AGENTS.md", "RUN-SHEET.md", "WORKSHOP.md", "PROMPTS.md",
     "docs/ACCEPTANCE.md", "docs/ARCHITECTURE.md", "docs/LIVE-SETUP.md",
     "docs/SOURCE-CONTEXT.md", "docs/SOURCES.md", "iteration/README.md",
+    "docs/ENTERPRISE-CI-DESIGN.md", "fixtures/enterprise/policy.json", "fixtures/enterprise/requests.json",
     ".github/ISSUE_TEMPLATE/hello-world.yml",
 )
 
@@ -73,6 +75,8 @@ def check(root: Path, require_draft: bool = False) -> None:
         if not path.is_file() or path.is_symlink():
             raise ContractError(f"Required regular file missing: {name}")
     check_source((root / "Jenkinsfile").read_bytes())
+    parse_policy(read_fixture(root / "fixtures" / "enterprise" / "policy.json"))
+    parse_requests(read_fixture(root / "fixtures" / "enterprise" / "requests.json"))
     workflow_dir = root / ".github" / "workflows"
     actual = {path.relative_to(root).as_posix() for path in workflow_dir.iterdir() if path.is_file()}
     if actual != HARNESS_WORKFLOWS:

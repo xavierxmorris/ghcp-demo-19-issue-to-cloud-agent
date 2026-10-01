@@ -1,4 +1,4 @@
-"""Preview offline, raise one unassigned issue, or process its opened event."""
+"""Preview or rehearse offline, raise one issue, or process its opened event."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from .contracts import (
     object_value, parse_body, positive_integer, repository_name, string_value,
 )
 from .evidence import reserve_output, write_bundle
+from .enterprise import run_enterprise
 from .github_api import ApiError, GhApi, RestApi, paginated, redact, task_session_for_pull
 from .service import Evidence, read_issue, root, safe_run_url, start_from_event, submit_request
 
@@ -134,11 +135,20 @@ def parser() -> argparse.ArgumentParser:
             command.add_argument("--accept-live-run", action="store_true")
         if name == "observe":
             command.add_argument("--issue", type=int, required=True)
+    enterprise = commands.add_parser("enterprise", help="Rehearse enterprise admission locally; no platform calls")
+    enterprise.add_argument("--out", type=Path, default=Path("out") / f"enterprise-{uuid.uuid4().hex[:12]}")
+    enterprise.add_argument("--ledger", type=Path, help="Explicitly reuse an owned out/*.sqlite3 ledger")
+    enterprise.add_argument("--max-new", type=int, help="Reduce this run's local admission allowance")
+    enterprise.add_argument("--stop-new-work", action="store_true")
     return result
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
+    if args.command == "enterprise":
+        return run_enterprise(
+            ROOT, args.out, args.ledger, stop_new_work=args.stop_new_work, max_new=args.max_new,
+        )
     bundle: Path | None = None
     evidence: Evidence | None = None
     try:

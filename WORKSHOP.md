@@ -1,6 +1,7 @@
 # Workshop: prove an issue-to-cloud-agent path
 
-**45-60 minutes after setup; cloud latency additional.**
+**45-60 minutes for the issue track; add 20-30 minutes for the offline
+enterprise-design track. Cloud latency additional.**
 Use a personal disposable clone/fork and only the synthetic fixture.
 
 ## What participants learn
@@ -9,6 +10,8 @@ Explain why issue creation, request approval, user-authorized assignment,
 cloud execution, a proposed PR and migration acceptance are separate.
 Reproduce a deterministic refusal and show why retrying a paid mutation is not
 ordinary retry logic.
+The enterprise track adds policy/runner/CI trust separation and a durable local
+admission queue without requiring organization access.
 
 ## 1. Predict the flow before running
 
@@ -95,3 +98,78 @@ and attempt evidence, a review disposition and an owned next experiment.
 
 No conversion percentage, productivity multiplier, production certification,
 general pipeline support, or migration completion is inferred from this lab.
+
+## Enterprise track: implement the architecture as observable decisions
+
+Read [the design and why](docs/ENTERPRISE-CI-DESIGN.md#runnable-integration-in-this-demo).
+Do not configure an actual bank organization for this exercise.
+
+### Predict the nine decisions
+
+Read both `fixtures\enterprise` files. Before running, predict which request:
+uses the shared-workflow route, duplicates earlier work, needs a human, lacks
+import readiness, tries unsafe automatic CI, escapes the agent runner, uses
+bounded direct conversion, fills capacity, or has opaque behavior.
+
+```powershell
+.\go.ps1 -Enterprise -NoBrowser
+```
+
+Open the reported `enterprise-report.md`. Its first fresh run has two local
+admissions, one duplicate, two manual cases, three blocked cases and one deferred
+case. Explain each result using its readable reason and the source fixture.
+Do not treat the eight pipeline definitions as a real estate sample.
+
+### Trace the five trust lanes
+
+Compare the two admitted plans. The shared candidate retains human workflow-run
+approval; the direct candidate's fixture asserts a reviewed, low-privilege
+automatic validation boundary. Both retain independent review before trusted
+build and separate production approval.
+
+Explain why different labels on the same host would not satisfy isolation,
+and why a manual approval button does not fix a privileged PR execution design.
+Identify which assertions would need evidence from a real bank platform.
+
+### Prove state survives a process
+
+```powershell
+python -m issue_agent enterprise --ledger out\workshop-enterprise.sqlite3 --out out\workshop-first
+python -m issue_agent enterprise --ledger out\workshop-enterprise.sqlite3 --out out\workshop-replay
+```
+
+The replay adds zero reservations and keeps queue depth two. Compare the
+snapshots and confirm the first report's bytes remain unchanged. The database
+is deliberately a sibling of the reports, not inside a sealed bundle.
+
+Read the tests for changed request IDs, repository renames, overlapping source
+revisions, separate pipeline definitions and two concurrent database clients.
+The latter tests exercise real SQLite transactions, not an in-memory duplicate
+set. They do not prove a distributed production scheduler.
+
+### Challenge stopping and limits
+
+```powershell
+.\go.ps1 -Enterprise -MaxNew 1 -NoBrowser
+.\go.ps1 -Enterprise -StopNewWork -NoBrowser
+```
+
+Predict one and zero new admissions respectively. Explain why the queue count
+is not a paid-credit limit, the stop flag is per invocation, and no worker exists
+to complete/dequeue these local reservations.
+
+In a dedicated exercise copy, change one fixture to request automatic CI while
+exposing a secret, a privileged follow-on, or production connectivity. A new
+ledger/report must show an explicit block. Changing `ci_approval` to `required`
+should still require manual boundary review, not magically admit unsafe work.
+
+After a policy/evaluator change, the old ledger must refuse the new fingerprint.
+Do not rewrite its policy row. Preserve old evidence and use a new, clearly
+labeled lab ledger.
+
+### Enterprise completion evidence
+
+Keep the two report bundles, observed decision counts, one negative case,
+request/policy identities and a concise account of what is implemented versus
+modeled. The mutable database stays in ignored local `out`. No new issue,
+model task, runner, secret, build or deployment should exist because of this lab.

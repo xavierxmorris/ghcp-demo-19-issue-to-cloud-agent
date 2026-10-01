@@ -3,10 +3,15 @@
 param(
     [Parameter(ParameterSetName = 'Check')][switch]$Check,
     [Parameter(ParameterSetName = 'Manual')][switch]$Manual,
+    [Parameter(Mandatory, ParameterSetName = 'Enterprise')][switch]$Enterprise,
+    [Parameter(ParameterSetName = 'Enterprise')][string]$Ledger,
+    [Parameter(ParameterSetName = 'Enterprise')][ValidateRange(1, 50)][int]$MaxNew,
+    [Parameter(ParameterSetName = 'Enterprise')][switch]$StopNewWork,
     [Parameter(Mandatory, ParameterSetName = 'Live')][switch]$Live,
     [Parameter(ParameterSetName = 'Live')][switch]$AcceptLiveRun,
     [Parameter(Mandatory, ParameterSetName = 'Live')][string]$Repository,
     [Parameter(ParameterSetName = 'Live')]
+    [Parameter(ParameterSetName = 'Enterprise')]
     [Parameter(ParameterSetName = 'Preview')][switch]$NoBrowser
 )
 
@@ -16,8 +21,14 @@ try {
     if ($Live -and -not $AcceptLiveRun) {
         throw 'Live issue creation requires -AcceptLiveRun. No cloud work was requested.'
     }
+    if ($PSCmdlet.ParameterSetName -eq 'Enterprise' -and -not $Enterprise) {
+        throw 'Enterprise ledger controls require -Enterprise.'
+    }
     if ($Manual) {
         Write-Host 'Offline: .\go.ps1 -Check; .\go.ps1 -NoBrowser'
+        Write-Host 'Enterprise rehearsal: .\go.ps1 -Enterprise -NoBrowser'
+        Write-Host 'Durable replay: .\go.ps1 -Enterprise -Ledger out\enterprise-workshop.sqlite3'
+        Write-Host 'Local limits: add -MaxNew 1 or -StopNewWork; no platform jobs are executed.'
         Write-Host 'Live: read docs\LIVE-SETUP.md, configure the scoped secret and enable the trigger.'
         Write-Host '.\go.ps1 -Live -AcceptLiveRun -Repository OWNER/REPO'
         Write-Host 'The runner creates an UNASSIGNED issue. The issues:opened workflow starts Copilot.'
@@ -34,7 +45,15 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'Repository checks failed.' }
         exit 0
     }
-    if ($Live) {
+    if ($Enterprise) {
+        $arguments = @('-m', 'issue_agent', 'enterprise')
+        if ($PSBoundParameters.ContainsKey('Ledger')) { $arguments += @('--ledger', $Ledger) }
+        if ($PSBoundParameters.ContainsKey('MaxNew')) { $arguments += @('--max-new', $MaxNew.ToString()) }
+        if ($StopNewWork) { $arguments += '--stop-new-work' }
+        & python @arguments
+        if ($LASTEXITCODE -ne 0) { throw 'Enterprise rehearsal failed; inspect its retained failure evidence.' }
+        Write-Host 'Local rehearsal only: no GitHub API, agent, workflow, runner, or deployment was started.'
+    } elseif ($Live) {
         $result = & python -m issue_agent raise --repository $Repository --accept-live-run
         if ($LASTEXITCODE -ne 0) { throw 'Issue creation failed; inspect the retained evidence before retrying.' }
         $result | Write-Output

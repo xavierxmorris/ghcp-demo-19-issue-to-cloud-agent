@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "mode": "synthetic-enterprise-rehearsal",
+  "status": "completed-locally",
+  "policy_id": "bank-ci-rehearsal-v1",
+  "policy_engine_fingerprint": "3fdd6064f3b6bb40329f89d0ed93b79bb7920e99d106de1366d87f1755635830",
+  "requests_fingerprint": "1f9b5f750666dc87037b10bc0da04c1dce8e0877661167ad39903e84674379f3",
+  "identifiers_are_fixtures": true,
+  "platform_controls_verified": false,
+  "live_api_calls": 0,
+  "cloud_tasks_started": 0,
+  "workflows_executed": 0,
+  "accepted_migrations": 0,
+  "request_count": 9,
+  "pipeline_definition_count": 8,
+  "stop_new_work": false,
+  "max_new_this_run": 3,
+  "max_queued": 2,
+  "new_local_work_items": 2,
+  "queue_depth": 2,
+  "decision_counts": {
+    "admitted": 2,
+    "duplicate": 1,
+    "manual-review": 2,
+    "blocked": 3,
+    "deferred": 1
+  },
+  "decisions": [
+    {
+      "request_id": "shared-candidate",
+      "repository": "synthetic-bank/demo-a",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "1111111111111111111111111111111111111111",
+      "status": "admitted",
+      "reason": "LOCAL_RESERVATION_CREATED",
+      "route": "shared-workflow-candidate",
+      "why": "Eligible under the synthetic policy; reserved locally, not dispatched.",
+      "policy_reason": "SYNTHETIC_CONTRACT_MATCH",
+      "policy_why": "The fixture declares an exact shared-contract match; prefer reuse.",
+      "canonical_request_id": "shared-candidate",
+      "work_key": "f26d288e0a32c1b1d43d850b68a873f897cc257894f746af82ba431a0451e936",
+      "planned_lanes": [
+        {
+          "lane": "agent",
+          "runner_group": "demo-agent-sandbox",
+          "isolation_boundary": "fixture-agent-zone",
+          "credential": "copilot-repository-branch",
+          "required_gate": "validated-intent-and-supported-task-start-identity",
+          "execution": "not-run"
+        },
+        {
+          "lane": "pr-validation",
+          "runner_group": "demo-pr-untrusted",
+          "isolation_boundary": "fixture-pr-zone",
+          "credential": "contents-read",
+          "required_gate": "human-workflow-approval",
+          "execution": "not-run"
+        },
+        {
+          "lane": "trusted-build",
+          "runner_group": "demo-trusted-build",
+          "isolation_boundary": "fixture-build-zone",
+          "credential": "artifact-publish",
+          "required_gate": "independent-review-and-protected-source",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-nonprod",
+          "runner_group": "demo-release-nonprod",
+          "isolation_boundary": "fixture-nonprod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "identified-artifact-and-nonprod-authorization",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-prod",
+          "runner_group": "demo-release-prod",
+          "isolation_boundary": "fixture-prod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "independent-production-approval-and-scoped-identity",
+          "execution": "not-run"
+        }
+      ]
+    },
+    {
+      "request_id": "duplicate-same-source",
+      "repository": "synthetic-bank/demo-a",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "1111111111111111111111111111111111111111",
+      "status": "duplicate",
+      "reason": "WORK_ALREADY_RESERVED",
+      "route": "shared-workflow-candidate",
+      "why": "Reuse the original reservation without consuming another queue slot.",
+      "policy_reason": "SYNTHETIC_CONTRACT_MATCH",
+      "policy_why": "The fixture declares an exact shared-contract match; prefer reuse.",
+      "canonical_request_id": "shared-candidate",
+      "work_key": "f26d288e0a32c1b1d43d850b68a873f897cc257894f746af82ba431a0451e936",
+      "planned_lanes": [
+        {
+          "lane": "agent",
+          "runner_group": "demo-agent-sandbox",
+          "isolation_boundary": "fixture-agent-zone",
+          "credential": "copilot-repository-branch",
+          "required_gate": "validated-intent-and-supported-task-start-identity",
+          "execution": "not-run"
+        },
+        {
+          "lane": "pr-validation",
+          "runner_group": "demo-pr-untrusted",
+          "isolation_boundary": "fixture-pr-zone",
+          "credential": "contents-read",
+          "required_gate": "human-workflow-approval",
+          "execution": "not-run"
+        },
+        {
+          "lane": "trusted-build",
+          "runner_group": "demo-trusted-build",
+          "isolation_boundary": "fixture-build-zone",
+          "credential": "artifact-publish",
+          "required_gate": "independent-review-and-protected-source",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-nonprod",
+          "runner_group": "demo-release-nonprod",
+          "isolation_boundary": "fixture-nonprod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "identified-artifact-and-nonprod-authorization",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-prod",
+          "runner_group": "demo-release-prod",
+          "isolation_boundary": "fixture-prod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "independent-production-approval-and-scoped-identity",
+          "execution": "not-run"
+        }
+      ]
+    },
+    {
+      "request_id": "near-match",
+      "repository": "synthetic-bank/demo-b",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "2222222222222222222222222222222222222222",
+      "status": "manual-review",
+      "reason": "CATALOG_NEAR_MATCH",
+      "route": "manual-review",
+      "why": "A near match needs a workflow owner's decision before admission.",
+      "policy_reason": "CATALOG_NEAR_MATCH",
+      "policy_why": "A near match needs a workflow owner's decision before admission.",
+      "canonical_request_id": null,
+      "work_key": "f50134ef89472158b99488d71ad10768962db25fe367f805f19b60ef4367ed5a",
+      "planned_lanes": []
+    },
+    {
+      "request_id": "import-not-ready",
+      "repository": "synthetic-bank/demo-c",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "3333333333333333333333333333333333333333",
+      "status": "blocked",
+      "reason": "IMPORT_NOT_READY",
+      "route": "none",
+      "why": "Repository arrival is not proof that the approved import handoff is complete.",
+      "policy_reason": "IMPORT_NOT_READY",
+      "policy_why": "Repository arrival is not proof that the approved import handoff is complete.",
+      "canonical_request_id": null,
+      "work_key": "43a96102f04baa897559fc87788e720be8f27f0c784d907d6eb70d4b37e7fe6d",
+      "planned_lanes": []
+    },
+    {
+      "request_id": "unsafe-auto-ci",
+      "repository": "synthetic-bank/demo-d",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "4444444444444444444444444444444444444444",
+      "status": "blocked",
+      "reason": "AUTO_CI_BOUNDARY_UNPROVEN",
+      "route": "none",
+      "why": "Automatic CI was requested without a complete low-privilege boundary.",
+      "policy_reason": "AUTO_CI_BOUNDARY_UNPROVEN",
+      "policy_why": "Automatic CI was requested without a complete low-privilege boundary.",
+      "canonical_request_id": null,
+      "work_key": "d022a87f124c2dc69d4c6d54b71ad0451b3080de950e321640208367624237a6",
+      "planned_lanes": []
+    },
+    {
+      "request_id": "runner-escape",
+      "repository": "synthetic-bank/demo-e",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "5555555555555555555555555555555555555555",
+      "status": "blocked",
+      "reason": "AGENT_RUNNER_OVERRIDE",
+      "route": "none",
+      "why": "The request tries to move agent work outside the centrally selected sandbox.",
+      "policy_reason": "AGENT_RUNNER_OVERRIDE",
+      "policy_why": "The request tries to move agent work outside the centrally selected sandbox.",
+      "canonical_request_id": null,
+      "work_key": "7c8512a7dcc41c9c01cc5f46308259146c929aa7a952118e6a619a84a1953b0e",
+      "planned_lanes": []
+    },
+    {
+      "request_id": "direct-candidate",
+      "repository": "synthetic-bank/demo-f",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "6666666666666666666666666666666666666666",
+      "status": "admitted",
+      "reason": "LOCAL_RESERVATION_CREATED",
+      "route": "direct-conversion-candidate",
+      "why": "Eligible under the synthetic policy; reserved locally, not dispatched.",
+      "policy_reason": "BOUNDED_DIRECT_CASE",
+      "policy_why": "The tiny known source has no declared shared-contract match; plan direct conversion.",
+      "canonical_request_id": "direct-candidate",
+      "work_key": "735ae1daa5aa82698d7eb1db14bf83e0bd2cfef1e0b23210589fc27ee82f6cc4",
+      "planned_lanes": [
+        {
+          "lane": "agent",
+          "runner_group": "demo-agent-sandbox",
+          "isolation_boundary": "fixture-agent-zone",
+          "credential": "copilot-repository-branch",
+          "required_gate": "validated-intent-and-supported-task-start-identity",
+          "execution": "not-run"
+        },
+        {
+          "lane": "pr-validation",
+          "runner_group": "demo-pr-untrusted",
+          "isolation_boundary": "fixture-pr-zone",
+          "credential": "contents-read",
+          "required_gate": "reviewed-unprivileged-CI-boundary",
+          "execution": "not-run"
+        },
+        {
+          "lane": "trusted-build",
+          "runner_group": "demo-trusted-build",
+          "isolation_boundary": "fixture-build-zone",
+          "credential": "artifact-publish",
+          "required_gate": "independent-review-and-protected-source",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-nonprod",
+          "runner_group": "demo-release-nonprod",
+          "isolation_boundary": "fixture-nonprod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "identified-artifact-and-nonprod-authorization",
+          "execution": "not-run"
+        },
+        {
+          "lane": "release-prod",
+          "runner_group": "demo-release-prod",
+          "isolation_boundary": "fixture-prod-zone",
+          "credential": "target-scoped-oidc",
+          "required_gate": "independent-production-approval-and-scoped-identity",
+          "execution": "not-run"
+        }
+      ]
+    },
+    {
+      "request_id": "queue-limit",
+      "repository": "synthetic-bank/demo-g",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "7777777777777777777777777777777777777777",
+      "status": "deferred",
+      "reason": "QUEUE_CAPACITY",
+      "route": "shared-workflow-candidate",
+      "why": "The local queue is full; defer rather than overrun its configured capacity.",
+      "policy_reason": "SYNTHETIC_CONTRACT_MATCH",
+      "policy_why": "The fixture declares an exact shared-contract match; prefer reuse.",
+      "canonical_request_id": null,
+      "work_key": "f046d831076f0641bc521a7526d5b05c547d8244d8a7280e531fac89e5f96fe3",
+      "planned_lanes": []
+    },
+    {
+      "request_id": "opaque-pipeline",
+      "repository": "synthetic-bank/demo-h",
+      "pipeline_path": "Jenkinsfile",
+      "source_revision": "8888888888888888888888888888888888888888",
+      "status": "manual-review",
+      "reason": "PIPELINE_BEHAVIOR_UNRESOLVED",
+      "route": "manual-review",
+      "why": "Opaque pipeline behavior needs an engineer, not an assumed conversion.",
+      "policy_reason": "PIPELINE_BEHAVIOR_UNRESOLVED",
+      "policy_why": "Opaque pipeline behavior needs an engineer, not an assumed conversion.",
+      "canonical_request_id": null,
+      "work_key": "81cc5318a491228f5eeaac63e15c4f41e017caeffa79d47bb3770ee5f938db9f",
+      "planned_lanes": []
+    }
+  ],
+  "queue_snapshot": [
+    {
+      "work_key": "735ae1daa5aa82698d7eb1db14bf83e0bd2cfef1e0b23210589fc27ee82f6cc4",
+      "request_id": "direct-candidate",
+      "route": "direct-conversion-candidate",
+      "state": "queued-locally"
+    },
+    {
+      "work_key": "f26d288e0a32c1b1d43d850b68a873f897cc257894f746af82ba431a0451e936",
+      "request_id": "shared-candidate",
+      "route": "shared-workflow-candidate",
+      "state": "queued-locally"
+    }
+  ],
+  "ledger": "out\\enterprise-final.sqlite3",
+  "recorded_at": "2026-10-01T02:12:10.028909+00:00"
+}

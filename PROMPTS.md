@@ -46,3 +46,24 @@ the actual session exposes it.
 > owner it would need. Prefer approved shared-workflow assessment before scaling
 > literal conversion. Do not implement portfolio discovery, production secrets,
 > a dashboard application or a wave controller without a separate scope.
+
+## Explain the executable enterprise design
+
+> Read the README enterprise track, the integrated design rationale, both
+> enterprise fixtures, enterprise.py and enterprise_ledger.py. Predict all
+> nine route decisions before running the offline command. Explain the
+> difference between local admission, modeled trust-lane requirements and
+> actual platform enforcement. Run the same requests twice with one explicit
+> local ledger and new report directories. Show why replay adds zero work.
+> Do not call GitHub, execute any planned lane, change live settings or claim
+> the fixture's approvals are authenticated.
+
+## Challenge a bank CI boundary without starting a job
+
+> In a disposable exercise copy, add one negative synthetic case for automatic
+> PR CI, runner placement, request identity or overlapping pipeline revisions.
+> State the expected refusal independently, add the regression test and make
+> the smallest change only if the implementation violates its existing
+> contract. Preserve the original live proof and sealed evidence. Do not weaken
+> a policy to accept a risk or turn a declared group name into a claim that
+> bank isolation has been configured.

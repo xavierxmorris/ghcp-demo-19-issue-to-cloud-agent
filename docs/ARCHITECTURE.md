@@ -1,5 +1,22 @@
 # Architecture: a visible work-order, not a migration factory
 
+## Two execution tracks
+
+The original live track below still operates on one owner-authorized synthetic
+issue. The new `enterprise` / `-Enterprise` track runs only local metadata
+validation, trust-lane planning and SQLite admission. It never invokes the live
+controller, GitHub API, source commands, runners or cloud agent.
+
+`enterprise.py` owns closed contracts and decisions; `enterprise_ledger.py`
+owns atomic persistence. Existing evidence helpers write fresh sealed snapshots
+while the mutable database stays outside the bundle. The
+[implemented enterprise design and rationale](ENTERPRISE-CI-DESIGN.md#runnable-integration-in-this-demo)
+explain the concrete route, duplicate, capacity and stop behavior.
+
+Names, source revisions, readiness, reviews and isolation are declared fixture
+data, not effective platform facts. No table row naming a production lane gives
+this local program production access.
+
 ## Four responsibilities
 
 | Component | Owns | Does not own |
@@ -159,5 +176,6 @@ Portfolio/custom-property discovery, import readiness, exact/near/no-match
 shared-workflow assessment, Maven-to-Gradle conversion, action quarantine/mirrors,
 private registries, OIDC/Vault, artifact provenance and bounded overnight waves
 are separate reviewed extensions. See [coverage](SOURCE-CONTEXT.md).
-The [enterprise design](ENTERPRISE-CI-DESIGN.md) describes a recommended
-bank-scale separation, not an implementation or compliance approval.
+The [enterprise design](ENTERPRISE-CI-DESIGN.md) now has a runnable local
+admission/plan demonstration. Its production integrations and compliance
+approval remain explicitly unimplemented.

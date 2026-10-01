@@ -11,7 +11,7 @@ from .contracts import ContractError, Json, assignment_payload, issue_body, obje
 from .service import Evidence
 
 
-def reserve_output(root: Path, output: Path) -> Path:
+def owned_output_path(root: Path, output: Path) -> Path:
     base = root.resolve()
     requested = output if output.is_absolute() else base / output
     allowed = base / "out"
@@ -19,7 +19,17 @@ def reserve_output(root: Path, output: Path) -> Path:
         raise ContractError("Evidence output cannot traverse symbolic links")
     resolved = requested.resolve()
     if resolved == allowed or not resolved.is_relative_to(allowed):
-        raise ContractError("Use a new bundle directory beneath this repository's out directory")
+        raise ContractError("Output must be below this repository's out directory")
+    for ancestor in resolved.parents:
+        if ancestor == allowed:
+            break
+        if (ancestor / "bundle-manifest.json").exists():
+            raise ContractError("Cannot write inside a completed evidence bundle")
+    return resolved
+
+
+def reserve_output(root: Path, output: Path) -> Path:
+    resolved = owned_output_path(root, output)
     if resolved.exists():
         raise ContractError("Output already exists; use a new bundle directory")
     resolved.mkdir(parents=True, exist_ok=False)
@@ -29,6 +39,14 @@ def reserve_output(root: Path, output: Path) -> Path:
 def write_json(path: Path, value: Json) -> None:
     with path.open("x", encoding="utf-8", newline="\n") as stream:
         stream.write(json.dumps(value, indent=2, ensure_ascii=True) + "\n")
+
+
+def seal_bundle(directory: Path) -> None:
+    files: dict[str, Json] = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(directory.iterdir()) if path.is_file()
+    }
+    write_json(directory / "bundle-manifest.json", {"schema_version": 1, "sha256": files})
 
 
 def verify_bundle(directory: Path) -> None:
@@ -100,8 +118,4 @@ def write_bundle(directory: Path, evidence: Evidence) -> None:
             directory / "assignment-request.json",
             assignment_payload(evidence.repository, evidence.source_commit),
         )
-    files: dict[str, Json] = {
-        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted(directory.iterdir()) if path.is_file()
-    }
-    write_json(directory / "bundle-manifest.json", {"schema_version": 1, "sha256": files})
+    seal_bundle(directory)

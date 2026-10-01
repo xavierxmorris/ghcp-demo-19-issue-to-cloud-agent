@@ -141,6 +141,17 @@ examples or attempting their external procedures.
 
 ## Ordered follow-on backlog, not hidden scope
 
+The issue/task/PR baseline below has since been observed in
+[the dated live proof](../iteration/2026-10-01-live-proof.md).
+The next explicitly requested integration adds an **offline enterprise
+admission rehearsal**, described in the
+[implemented design and why](ENTERPRISE-CI-DESIGN.md#runnable-integration-in-this-demo).
+It exercises synthetic readiness/routing/runner/CI-boundary decisions, real
+local SQLite reservations and bounded admission. It does not implement a
+production catalog assessor, organization dispatcher, token broker or cloud
+worker. The original published reading baselines and private-data boundaries
+above remain unchanged.
+
 1. Complete the one live issue/session/PR observation and independent proposal review.
 2. Add one controlled pipeline behavior at a time and record baseline gaps.
 3. Assess approved shared-workflow exact/near/no-match routing before broad literal conversion.

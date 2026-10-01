@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "data_classification": "synthetic",
+  "policy_id": "bank-ci-rehearsal-v1",
+  "repository_runner_overrides": false,
+  "runner_lifetime": "clean-ephemeral",
+  "lanes": {
+    "agent": {
+      "runner_group": "demo-agent-sandbox",
+      "isolation_boundary": "fixture-agent-zone",
+      "credential": "copilot-repository-branch"
+    },
+    "pr-validation": {
+      "runner_group": "demo-pr-untrusted",
+      "isolation_boundary": "fixture-pr-zone",
+      "credential": "contents-read"
+    },
+    "trusted-build": {
+      "runner_group": "demo-trusted-build",
+      "isolation_boundary": "fixture-build-zone",
+      "credential": "artifact-publish"
+    },
+    "release-nonprod": {
+      "runner_group": "demo-release-nonprod",
+      "isolation_boundary": "fixture-nonprod-zone",
+      "credential": "target-scoped-oidc"
+    },
+    "release-prod": {
+      "runner_group": "demo-release-prod",
+      "isolation_boundary": "fixture-prod-zone",
+      "credential": "target-scoped-oidc"
+    }
+  },
+  "limits": {
+    "max_queued": 2,
+    "max_new_per_run": 3
+  }
+}

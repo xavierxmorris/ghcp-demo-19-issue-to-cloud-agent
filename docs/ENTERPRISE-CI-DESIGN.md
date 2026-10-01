@@ -1,12 +1,155 @@
 # Bank-scale CI: central policy, isolated execution, bounded automation
 
-**Architecture recommendation, not deployed bank infrastructure or compliance
-approval. Sources checked 1 October 2026.**
+**Runnable synthetic admission rehearsal plus architecture recommendation.
+Not deployed bank infrastructure or compliance approval. Sources checked
+1 October 2026.**
 
 Assumption: the bank permits GitHub Enterprise Cloud and has approved the source
 classification, model processing, residency, retention and contractual terms.
 A private runner or Azure VNet does not turn Copilot into a local/offline model
 or establish those approvals.
+
+## Runnable integration in this demo
+
+The design is now integrated into the demo's executable entry points:
+
+```powershell
+.\go.ps1 -Enterprise -NoBrowser
+python -m issue_agent enterprise --ledger out\bank-lab.sqlite3 --out out\bank-first
+python -m issue_agent enterprise --ledger out\bank-lab.sqlite3 --out out\bank-replay
+```
+
+Use new output names if those directories exist. `-Enterprise` does not share
+the live runner's credential path and cannot be combined with `-Live`.
+
+```text
+shipped synthetic request records
+    -> strict JSON and policy contracts
+    -> deterministic readiness / identity / route / CI-boundary decision
+    -> real local SQLite transaction
+         -> existing work: duplicate, no new reservation
+         -> stop / run limit / queue full: deferred
+         -> eligible and capacity available: queued locally
+    -> fresh immutable report and planned five-lane path
+    -> STOP: no GitHub task, workflow or deployment is executed
+```
+
+### Implemented, modeled and still a platform responsibility
+
+| Design element | What runs here | What is not established |
+| --- | --- | --- |
+| Explicit intake | Strict synthetic fields, typed booleans, immutable-looking fixture IDs/revisions | Real owner authentication, source existence or bank AI-processing consent |
+| Central runner placement | Requests must select the policy's agent group; overrides/shared lane identifiers are rejected | Effective organization runner setting, VM cleanliness or network separation |
+| Shared/direct/manual routing | Exact tiny-source match -> shared candidate; absent match -> direct; near/opaque -> manual; unknown -> blocked | Semantic Jenkins parsing or inspection/approval of a real shared-workflow catalog |
+| Selective automatic CI | Incomplete inventory, unreviewed boundary, token writes, secrets, production network or privileged follow-on block automatic CI | A verified account's complete reachable workflow graph or actual branch protections |
+| Durable admission | Real SQLite transactions, unique work identity, immutable request hashes and occupied-pipeline checks | Cloud dispatch, distributed delivery, multi-region/high-availability state or worker reconciliation |
+| Submission controls | Persistent queue depth, reducible per-run admission count and per-invocation stop switch | Paid-credit budget, elapsed-time controller, cloud concurrency or cancellation |
+| Trust lanes | Separate group/isolation/credential/gate values in the plan; every execution is `not-run` | Provisioned runners, OIDC grants, artifacts, deployment approvals or releases |
+| Evidence | Actual decision and queue snapshot in a fresh hashed report | Authenticated audit storage or proof that fixture assertions are true |
+
+The shipped policy creates no platform resources. Group/zone names, repository
+IDs and source revisions are clearly labeled invented values. The command does
+not read pipeline source, consult GitHub or import the private source notes.
+
+### First-run result and reasons
+
+| Fixture | Result | Why |
+| --- | --- | --- |
+| `shared-candidate` | Admitted locally | Known synthetic source and declared exact shared-contract match |
+| `duplicate-same-source` | Duplicate | Same immutable repository/pipeline/source/policy identity |
+| `near-match` | Manual review | A close workflow match still needs an owner decision |
+| `import-not-ready` | Blocked | Repository arrival is not a completed import handoff |
+| `unsafe-auto-ci` | Blocked | Automatic CI cannot expose secrets or a privileged follow-on |
+| `runner-escape` | Blocked | The agent cannot select the production release runner |
+| `direct-candidate` | Admitted locally | Known tiny source with no declared shared contract; automatic validation is modeled as isolated |
+| `queue-limit` | Deferred | Two local work items have filled this fixture's queue |
+| `opaque-pipeline` | Manual review | No known behavior contract, even if a familiar tool might be present |
+
+The second process using the same ledger admits nothing, reports three
+duplicates and retains queue depth two. This is reproducible persistence,
+not a canned report. The report shows nine requests and eight pipeline definitions,
+with zero cloud tasks, executed workflows or accepted migrations.
+
+### Design decisions and tradeoffs
+
+| Decision | Why this choice | Alternative deliberately not selected |
+| --- | --- | --- |
+| Keep the live path and enterprise rehearsal separate | Preserve the proven one-task boundary and require no bank credentials | Silently widening the issue form into an organization-wide dispatcher |
+| Use existing Python/PowerShell entry points | Participants can run and inspect the design with the current toolchain | A new service, portal, broker deployment or package stack before its platform is chosen |
+| Use standard-library SQLite | Demonstrate real cross-process persistence and atomic checks without installation | A process-memory set that loses duplicate protection on restart |
+| Include immutable repository ID in work identity | A rename must not create a second reservation for identical work | Deduplication by display name alone |
+| Keep request ID -> input hash immutable | A changed request cannot reuse old authorization-shaped evidence | Updating the previous row and hiding the change |
+| Preserve the original work intent across duplicate IDs | A new request ID cannot silently change the queued route, reviewer or CI-approval plan | Reporting new authority for an existing reservation |
+| Permit one queued revision per pipeline | Avoid two conflicting source-revision migrations in the same local queue | Calling every new commit a safe independent task |
+| Bind the ledger to policy and evaluator identity | A rule/code change must not silently reinterpret old decisions | Reusing a mutable version string as sufficient provenance |
+| Keep lane groups and isolation boundaries distinct | Different labels on a shared host are not separation | One privileged shared runner fleet |
+| Treat manual approval as insufficient for an unsafe CI boundary | An approval button does not sanitize privileges or network exposure | Letting `required` bypass missing CI design |
+| Do not convert declared eligibility into job execution | Teaching metadata and local checks cannot authorize real workloads | Automatically invoking live tasks or fake production jobs |
+| Keep the database outside the sealed report | Queue state is mutable; evidence snapshots must not change | Hashing a live SQLite file then mutating it inside the bundle |
+
+### Admission identity and transaction
+
+The work key covers **repository ID + pipeline path + source revision +
+policy/evaluator fingerprint**. A separate unique pipeline key prevents
+overlapping queued revisions. The request table separately detects a changed
+payload reusing a request ID. An intent hash excludes only the request ID and
+mutable repository name: a duplicate cannot silently change the original route,
+reviewer, runner or CI-approval declaration.
+
+The fingerprint binds canonical policy JSON plus the normalized Python source
+for the evaluator, ledger and shared contracts. Formatting-only JSON changes
+do not invent a new policy; changed behavior requires a fresh ledger. This is
+local drift detection, not a digital signature or a policy-approval system.
+
+Each request is handled inside `BEGIN IMMEDIATE`: verify/request-register,
+check prior work and capacity, then insert one reservation atomically. A
+SQLite error rolls back that request. Earlier committed requests remain durable
+if a later operation fails, and the error report directs the operator to inspect
+state before replaying. Report creation is not a transaction with the database.
+
+The local store has a demo application ID and schema version. Existing foreign,
+uninitialized or incompatible databases are refused instead of overwritten.
+Initial creation is exclusive; simultaneous first-time initialization may
+return an explicit error to one caller. Once initialized, concurrent connections
+are covered by the atomic duplicate/capacity tests.
+
+This queue has **no worker or completion/reset command**. Entries remain
+`queued-locally`; the fixture intentionally fills its queue. Use a new ledger
+for an independent lab, not as a way to evade live idempotency. A production
+control plane must implement governed lifecycle transitions, dispatch/reconcile
+logic, migrations, leases, retention and high availability.
+
+### Stop and limit exercises
+
+```powershell
+.\go.ps1 -Enterprise -MaxNew 1 -NoBrowser
+.\go.ps1 -Enterprise -StopNewWork -NoBrowser
+```
+
+On fresh state, the first admits one item; the second admits zero. Duplicates
+consume no new slot. A replay with the stop switch still reports existing
+reservations instead of pretending they vanished.
+
+`-MaxNew` can only reduce the configured per-run limit. `-StopNewWork` affects
+that invocation; it is not a shared service-wide kill switch and does not cancel
+anything. Neither is a monetary budget. No real cloud task is needed to
+demonstrate these limits.
+
+### How the implementation is checked
+
+The existing `-Check`/unittest/CI path includes expected outcomes for all nine
+records, changed request IDs, repository renames, multiple pipeline definitions,
+competing source revisions, policy mutation, two-connection duplicate/capacity
+races, stop/limit behavior, foreign databases, malformed contracts and path
+containment. CLI tests fail immediately if this mode invokes a cloud client,
+external command or network connection.
+
+The existing live controller, workflow allow-list, root source and original
+cloud-proof bundles remain unchanged. These new tests are not evidence that
+bank runner groups or review rules are configured.
+
+[The integration observation](../iteration/2026-10-01-enterprise-integration.md)
+contains the real local results and four complete report/manifest snapshots.
 
 ## Recommendation
 

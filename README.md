@@ -1,11 +1,16 @@
 # Demo 19 - Open an issue, start the Copilot cloud agent
 
-**Public synthetic proof | issue-opened trigger | offline by default | no merge**
+**Public synthetic proof | issue-opened trigger | runnable enterprise rehearsal | no merge**
 
 Open one structured, **unassigned** GitHub issue. A GitHub Actions workflow
 validates the request, assigns it to Copilot using a separate user-authorized
 token, and leaves the agent to prepare an inactive Hello World workflow and a
 review packet in a pull request.
+
+The same repository now includes a **runnable enterprise-design mode**.
+It rehearses admission, shared-versus-direct routing, five isolated execution
+lanes, durable duplicate protection, queue limits and a stop switch using only
+local synthetic data. It does not provision or claim to enforce bank controls.
 
 ```text
 Owner opens the synthetic request issue
@@ -24,11 +29,18 @@ an issue without an assignee; it does not quietly start a local Copilot session
 or call the Agent Tasks endpoint instead.
 
 **Reading paths:** [try it offline](#run-offline-first),
+[run the enterprise design](#run-the-enterprise-design),
 [prepare a live run](#run-the-real-issue-trigger-proof),
 [understand the build](#how-this-demo-was-built),
 [review the live evidence](iteration/2026-10-01-live-proof.md),
 [consider bank-scale CI](docs/ENTERPRISE-CI-DESIGN.md),
 or [check the limits](#honesty-notes).
+
+| Track | What runs | What it proves |
+| --- | --- | --- |
+| Default preview | Local request/evidence generation | The small issue/assignment contract, without GitHub |
+| `-Enterprise` | Local policy evaluator and SQLite admission ledger | Synthetic routing, trust-lane plans, replay and limits |
+| `-Live -AcceptLiveRun` | One real issue-triggered cloud task after setup | The documented issue -> assignment -> agent -> PR interaction |
 
 ## Verified live result
 
@@ -66,6 +78,8 @@ The purpose is to prove **trigger plumbing**, not demonstrate a clever converter
 The existing cloud agent receives a tiny, explicit output contract. There is
 no new migration model, hosted service, MCP server, custom persona, portal,
 portfolio scan, or claim that direct translation is the preferred final design.
+The enterprise track applies the same evidence discipline to a local rehearsal;
+it does not turn the small live path into an organization-wide service.
 
 ## Run offline first
 
@@ -90,6 +104,89 @@ a new bundle: `report.json`, `report.md`, `issue-body.md`,
 `assignment-request.json`, and `bundle-manifest.json`. Nothing is submitted.
 Existing output directories are refused. A manifest is a local integrity
 check, not an authenticated audit record.
+
+## Run the enterprise design
+
+No token, network, GitHub organization, runner, cloud resource, package install
+or model is needed:
+
+```powershell
+.\go.ps1 -Enterprise -NoBrowser
+```
+
+This runs nine labeled synthetic requests under
+[`fixtures\enterprise\policy.json`](fixtures/enterprise/policy.json) and
+[`requests.json`](fixtures/enterprise/requests.json). The fresh-ledger result is:
+
+| Decision | Count | Meaning |
+| --- | --- | --- |
+| Admitted | 2 | One declared shared-contract candidate and one bounded direct-conversion candidate, reserved **locally** |
+| Duplicate | 1 | Same pipeline/source as an existing reservation |
+| Manual review | 2 | A near match and an opaque pipeline |
+| Blocked | 3 | Incomplete import, unsafe automatic CI, or attempted agent-runner escape |
+| Deferred | 1 | The local queue reached its two-item limit |
+
+The denominator is **nine requests for eight pipeline definitions**, not an
+estate-size or migration-success measure. Every cloud-job and accepted-migration
+counter remains zero. Each decision has a reason code and readable explanation.
+
+Admitted work receives a plan through **agent sandbox -> untrusted PR
+validation -> trusted build -> non-production release -> production release**.
+Each lane retains its own group, isolation boundary, credential class and gate;
+every lane is marked **not run**. Safe automatic validation never removes the
+independent review or production-approval gates.
+
+### Prove durable replay
+
+Use one explicit ledger and new output directories. These commands work in
+separate processes:
+
+```powershell
+python -m issue_agent enterprise `
+  --ledger out\enterprise-lab.sqlite3 --out out\enterprise-first
+
+python -m issue_agent enterprise `
+  --ledger out\enterprise-lab.sqlite3 --out out\enterprise-replay
+```
+
+The second run creates **zero new work items** and retains queue depth two.
+It reports three duplicates: both requests for the first pipeline plus the
+previously admitted direct candidate.
+
+The real SQLite transaction uses immutable repository ID, pipeline path,
+source revision and policy/engine identity. A changed request cannot reuse its
+old ID, and a new revision cannot silently overlap another queued revision of
+the same pipeline. This is local admission persistence, not distributed task
+delivery or a replacement for GitHub's live task ledger.
+
+### Exercise limits without paid work
+
+```powershell
+.\go.ps1 -Enterprise -MaxNew 1 -NoBrowser
+.\go.ps1 -Enterprise -StopNewWork -NoBrowser
+```
+
+The first admits one local item. The second admits none. `-MaxNew` can lower,
+not raise, the policy limit. These are **work-item counts**, not a monetary or
+AI-credit budget. No production resource or live policy changes.
+
+### Inspect the evidence
+
+Each run writes `enterprise-report.json`, a readable `enterprise-report.md`,
+and `bundle-manifest.json` in a new directory. The report contains the decision
+table, planned lanes, request and policy identities, and a queue snapshot.
+
+The mutable `.sqlite3` ledger is kept **outside** the immutable report bundle.
+Reuse it only with `--ledger`/`-Ledger`; default runs create independent ledgers.
+A policy or evaluator change requires a new ledger instead of silently
+reinterpreting previous work. Do not delete a valuable ledger to hide duplicate
+or blocked decisions.
+
+Read [the implemented design and why](docs/ENTERPRISE-CI-DESIGN.md#runnable-integration-in-this-demo)
+for the execution boundary, tradeoffs and remaining production work.
+[Recorded enterprise evidence](iteration/2026-10-01-enterprise-integration.md)
+retains the actual first-run, replay, cap and stop outputs, separately from the
+real cloud-agent proof.
 
 ## Run the real issue-trigger proof
 
@@ -166,6 +263,9 @@ enforcement.
 | `.\go.ps1 -Check` | Offline tests and repository contracts |
 | `.\go.ps1 -Manual` | Print commands only |
 | `.\go.ps1 -NoBrowser` | Offline preview; retained for suite familiarity |
+| `.\go.ps1 -Enterprise [-NoBrowser]` | Fresh offline enterprise admission, lane plan and local ledger |
+| `.\go.ps1 -Enterprise -Ledger out\lab.sqlite3` | Explicit durable replay with a fresh report |
+| Enterprise mode plus `-MaxNew 1` / `-StopNewWork` | Reduce local admissions / admit no new work |
 | `.\go.ps1 -Live -AcceptLiveRun -Repository OWNER/REPO` | Raise/reuse one real issue; can consume credits and Actions minutes |
 | Live command plus `-NoBrowser` | Same real mutation, without opening the issue in a browser |
 
@@ -183,7 +283,7 @@ CLI session or changes personal Copilot configuration.
 | [Acceptance](docs/ACCEPTANCE.md) | Separate trigger, agent, proposal, and human acceptance gates |
 | [Source coverage](docs/SOURCE-CONTEXT.md) | Complete reading scope and requirement disposition |
 | [Sources](docs/SOURCES.md) | Current API documentation, action pins, dates and limitations |
-| [Enterprise CI design](docs/ENTERPRISE-CI-DESIGN.md) | Bank-scale orchestration, organization runner policy, isolated execution, and selective automation |
+| [Enterprise CI design](docs/ENTERPRISE-CI-DESIGN.md) | Runnable integration, decision rationale, bank-scale architecture and explicit implementation limits |
 
 ## How this demo was built
 
@@ -476,21 +576,51 @@ artifact provenance and bounded waves.
 
 Those topics were considered and mapped, not forgotten. They require their own
 source/target contracts, permissions, owners and acceptance tests. Implementing
-them before the first issue-trigger proof would obscure the actual requirement
-and make failures harder to diagnose. The ordered backlog is preserved in
+their production integrations before the first issue-trigger proof would
+obscure the actual requirement and make failures harder to diagnose. The ordered backlog is preserved in
 [Source-context coverage](docs/SOURCE-CONTEXT.md).
 
-### 14. Separate enterprise automation from the proof's authority
+### 14. Integrate the enterprise design without widening live authority
 
 The [bank-scale design](docs/ENTERPRISE-CI-DESIGN.md) builds on the verified
 interaction without claiming the public demo is a banking platform. It separates
 central admission/orchestration, Copilot runner placement, untrusted PR checks,
 trusted builds and production promotion.
 
+The user then selected a runnable synthetic integration rather than a
+documentation-only change or real organization provisioning. Two small modules
+implement that decision:
+
+| File | Responsibility | Why separate it |
+| --- | --- | --- |
+| `enterprise.py` | Closed fixture contracts, deterministic admission/routing, lane plans and readable reports | Policy reasoning stays explicit and testable without a cloud client |
+| `enterprise_ledger.py` | SQLite request identity, atomic reservations, duplicate/pipeline/queue checks | Persistence and concurrent admission are not delegated to a model |
+| `fixtures\enterprise` | One synthetic policy and nine fully specified requests | No source scan, live secret or guessed bank configuration |
+| Existing CLI, runner and evidence helpers | New `enterprise` command / `-Enterprise` mode, fresh bundles and hashes | Preserve the established entry points without duplicating live orchestration |
+
+The SQLite database is initialized for this demo with an application ID and
+schema version. It records a policy/evaluator fingerprint, immutable request
+hashes and unique work reservations. `BEGIN IMMEDIATE` makes duplicate and
+queue-capacity checks part of the same transaction as the reservation. Tests
+use two independent database connections to challenge those boundaries.
+
+The evaluator distinguishes exact, near, absent and unknown catalog matches,
+but those inputs are **fixture assertions**, not an implemented bank catalog
+assessor. It models complete/reviewed low-privilege PR boundaries and refuses
+unsafe automatic CI; it does not verify GitHub settings by trusting a boolean
+in a real customer request.
+
 Organization runner policy controls where the agent runs. Repository-level
 automatic workflow approval controls whether Copilot PR workflows start without
 a person. Required PR reviews and protected deployment authority remain separate.
-No bank settings or approval policy were changed as part of this demo.
+The new mode cannot call any of those platform APIs. No active workflow, live
+issue form, assignment payload, source fixture or existing evidence was changed.
+
+The decision rationale is explicit: a runnable admission rehearsal teaches the
+larger design without reusing the public PoC's temporary user-token pattern as
+an enterprise service, pretending five labels create isolation, or performing
+unapproved paid work. Actual worker dispatch, reconciliation, a distributed
+queue, broker, network enforcement and releases remain separate implementation.
 
 ## Honesty notes
 
@@ -498,6 +628,9 @@ No bank settings or approval policy were changed as part of this demo.
   or approval, and no private source repository is sent to the cloud agent.
 - Python validates and orchestrates. Copilot, if actually started, authors the
   proposal. Offline tests use explicit API doubles, not model results.
+- Enterprise mode uses real local SQLite persistence but simulated metadata.
+  Runner/network/identity and review fields are declarations, not authenticated
+  controls. No shared-workflow lookup, runner provisioning or job execution occurs.
 - This is github.com and a personally owned demo repository, not GHES,
   an enterprise implementation, or an organization-owned workload identity.
 - The workflow token handles ordinary reads/labels. The current preview
@@ -517,7 +650,9 @@ No bank settings or approval policy were changed as part of this demo.
   verify required reviews/rulesets separately before using any real workload.
 - No repository discovery, Airflow rehabilitation, custom-property mutation,
   dashboard product, shared-workflow assessor, Gradle conversion, Vault trust,
-  action-sync service, or overnight wave is silently included.
+  action-sync service, or live overnight wave is silently included. The local
+  rehearsal demonstrates admission limits, not production concurrency, cost
+  enforcement or distributed exactly-once delivery.
 
 Current sources were checked **1 October 2026**. APIs and policy can change;
 recheck [the source register](docs/SOURCES.md) before another live setup.

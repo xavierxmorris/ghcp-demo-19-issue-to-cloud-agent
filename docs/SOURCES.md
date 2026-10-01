@@ -92,3 +92,8 @@ The [dated live proof](../iteration/2026-10-01-live-proof.md) records what actua
 happened here, including the CLI observation failure and the workflow-approval
 API's HTTP 403. The [enterprise design](ENTERPRISE-CI-DESIGN.md) contains the
 additional runner, network and governance sources for the bank-scale discussion.
+
+The executable enterprise mode is local, standard-library Python/SQLite logic.
+It reuses the same dated platform evidence rather than asserting new GitHub
+capabilities. Its synthetic runner/network/authorization fields are test inputs,
+not substitutes for checking effective organization configuration.
