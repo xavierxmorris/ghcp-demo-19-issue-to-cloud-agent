@@ -438,7 +438,8 @@ authoring check, not an added offline runtime dependency.
 The first live observation revealed another important boundary: GitHub CLI
 2.93.0 documents PR selectors, but its command implementation requires an
 actual session ID when running without an interactive terminal. The original
-observer therefore failed after the cloud task had already succeeded.
+observer therefore failed after assignment succeeded, while the cloud task
+continued and subsequently completed.
 The fix uses documented, repository-scoped **GET** endpoints to establish the
 task and session identities. The clients explicitly reject writes to Agent
 Tasks endpoints: work still starts only through issue assignment. The expanded
