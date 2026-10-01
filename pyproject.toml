@@ -1,0 +1,10 @@
+[project]
+name = "ghcp-demo-19-issue-to-cloud-agent"
+version = "0.1.0"
+description = "Synthetic issue-opened to Copilot cloud-agent proof"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"

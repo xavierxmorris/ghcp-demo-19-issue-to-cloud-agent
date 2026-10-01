@@ -1,0 +1,46 @@
+name: Issue to Copilot cloud agent
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: issue-agent-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  start:
+    if: >-
+      github.event.issue.user.login == github.repository_owner &&
+      contains(github.event.issue.labels.*.name, 'cloud-agent-request')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: issue-agent
+    steps:
+      - name: Check out the trusted event revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Validate request and assign with the separate user identity
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COPILOT_USER_TOKEN: ${{ secrets.COPILOT_USER_TOKEN }}
+          ISSUE_AGENT_ENABLED: ${{ vars.ISSUE_AGENT_ENABLED }}
+        run: python -m issue_agent trigger --out out/trigger-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Retain token-free attempt evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: issue-agent-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/trigger-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: error
+          retention-days: 7

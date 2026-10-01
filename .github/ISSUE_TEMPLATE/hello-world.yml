@@ -1,0 +1,37 @@
+name: Start the synthetic cloud-agent proof
+description: Open one unassigned work-order; the workflow validates it and assigns Copilot.
+title: "[cloud-agent] Draft the synthetic Hello World migration"
+labels: ["cloud-agent-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This public demo accepts only the repository owner's request, only the
+        shipped synthetic Jenkinsfile, and only the current main commit.
+        Complete docs/LIVE-SETUP.md first. Creating this issue can consume
+        Actions minutes and Copilot credits. Leave Assignees empty.
+        No customer code, extra task instructions, or secret values.
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: Scenario
+      options:
+        - hello-world-v1
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: source_commit
+    attributes:
+      label: Source commit
+      description: The complete 40-character lowercase commit SHA at main; not a branch or tag.
+      placeholder: Copy the latest main commit SHA from the repository.
+    validations:
+      required: true
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Authorization
+      options:
+        - label: I authorize one synthetic Copilot task and its Actions/AI-credit usage. No merge, deployment, or Jenkins cutover.
+          required: true
