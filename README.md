@@ -26,7 +26,27 @@ or call the Agent Tasks endpoint instead.
 **Reading paths:** [try it offline](#run-offline-first),
 [prepare a live run](#run-the-real-issue-trigger-proof),
 [understand the build](#how-this-demo-was-built),
+[review the live evidence](iteration/2026-10-01-live-proof.md),
+[consider bank-scale CI](docs/ENTERPRISE-CI-DESIGN.md),
 or [check the limits](#honesty-notes).
+
+## Verified live result
+
+On **1 October 2026**, an unassigned [issue #2](https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/issues/2)
+started the [issue workflow](https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/actions/runs/36795695019).
+Copilot completed one real cloud task and opened
+[draft PR #3](https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/pull/3)
+with exactly the two permitted inactive files. Nothing was merged or activated.
+
+A second run of the **same issue event** returned `already-assigned`, with zero
+mutations and no assignment attempt. It did not create another agent task.
+The frozen proposal passed its 64-test suite and strict proposal gate.
+Its hosted PR CI was held for GitHub's human workflow-approval gate.
+
+The live test also exposed and fixed a non-interactive CLI observation bug.
+The exact task/session IDs, immutable source and PR revisions, original
+failure, successful observation and remaining boundaries are retained in
+[the dated proof](iteration/2026-10-01-live-proof.md).
 
 ## Why this demo exists
 
@@ -163,6 +183,7 @@ CLI session or changes personal Copilot configuration.
 | [Acceptance](docs/ACCEPTANCE.md) | Separate trigger, agent, proposal, and human acceptance gates |
 | [Source coverage](docs/SOURCE-CONTEXT.md) | Complete reading scope and requirement disposition |
 | [Sources](docs/SOURCES.md) | Current API documentation, action pins, dates and limitations |
+| [Enterprise CI design](docs/ENTERPRISE-CI-DESIGN.md) | Bank-scale orchestration, organization runner policy, isolated execution, and selective automation |
 
 ## How this demo was built
 
@@ -379,12 +400,15 @@ identity, issue/run links, mutation facts, errors, and whether assignment or
 agent execution was actually observed. It also retains the issue body and
 assignment request. A manifest hashes the finished files and is written last.
 
-`observe` follows the issue's same-repository Copilot PR reference and reads the
-actual linked session through `gh agent-task view`. It does not infer a session
-from a branch name or invent a task ID when no session is visible.
+`observe` follows the issue's same-repository Copilot PR reference, matches its
+database ID to the repository-scoped Agent Tasks API, and reads the actual
+task's sessions. It handles active and archived tasks, rejects ambiguous
+matches and chooses the newest session by its timezone-qualified creation time.
+It does not invent a task/session ID or scan other repositories' tasks.
 
 The controller's observation is narrower than the full agent log. It records
-the model as not observed unless separately evidenced. An agent completion or
+the model reported by the session, when available, without copying prompts,
+credential material or usage/billing payloads. An agent completion or
 PR never changes the accepted-migration count: the report remains **0 out of 1**
 because this demo does not perform human acceptance or cutover.
 
@@ -410,6 +434,16 @@ claim that the first attempt was perfect.
 Workflow syntax/expressions were also checked with a checksum-verified,
 versioned actionlint executable after it was found missing locally. It is an
 authoring check, not an added offline runtime dependency.
+
+The first live observation revealed another important boundary: GitHub CLI
+2.93.0 documents PR selectors, but its command implementation requires an
+actual session ID when running without an interactive terminal. The original
+observer therefore failed after the cloud task had already succeeded.
+The fix uses documented, repository-scoped **GET** endpoints to establish the
+task and session identities. The clients explicitly reject writes to Agent
+Tasks endpoints: work still starts only through issue assignment. The expanded
+regression suite covers this correction; the current 77-test gate also verifies
+retained evidence integrity. It did not require a second model task.
 
 ### 12. Publish only the finished synthetic build and verified facts
 
@@ -444,6 +478,18 @@ source/target contracts, permissions, owners and acceptance tests. Implementing
 them before the first issue-trigger proof would obscure the actual requirement
 and make failures harder to diagnose. The ordered backlog is preserved in
 [Source-context coverage](docs/SOURCE-CONTEXT.md).
+
+### 14. Separate enterprise automation from the proof's authority
+
+The [bank-scale design](docs/ENTERPRISE-CI-DESIGN.md) builds on the verified
+interaction without claiming the public demo is a banking platform. It separates
+central admission/orchestration, Copilot runner placement, untrusted PR checks,
+trusted builds and production promotion.
+
+Organization runner policy controls where the agent runs. Repository-level
+automatic workflow approval controls whether Copilot PR workflows start without
+a person. Required PR reviews and protected deployment authority remain separate.
+No bank settings or approval policy were changed as part of this demo.
 
 ## Honesty notes
 

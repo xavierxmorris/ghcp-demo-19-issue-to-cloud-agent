@@ -1,0 +1,25 @@
+{
+  "mode": "raise",
+  "repository": "xavierxmorris/ghcp-demo-19-issue-to-cloud-agent",
+  "state": "issue-created",
+  "source_commit": "cc2ce2f21397f45c4b38fad704378152408521a8",
+  "source_commit_is_fixture": false,
+  "controller_commit": null,
+  "source_sha256": "dba88eedd823cf62db9136941f91fb37bddd40898e7c1baeef8eb66c5d43a54f",
+  "issue_number": 2,
+  "issue_url": "https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/issues/2",
+  "workflow_run_url": null,
+  "assignment_attempted": false,
+  "assignment_verified": false,
+  "agent_execution_observed": false,
+  "selected_pipeline_definitions": 1,
+  "migrated_pipeline_definitions": 0,
+  "mutations": [
+    "issue-created-unassigned"
+  ],
+  "pull_requests": [],
+  "error": null,
+  "schema_version": 1,
+  "recorded_at": "2026-10-01T00:20:33.988278+00:00",
+  "model": "platform default; actual model not observed by this controller"
+}

@@ -76,6 +76,23 @@ production environment or remove its reviewers.
 
 For this one-off proof, create an approved, short-lived **fine-grained personal
 access token** under the demo owner. Select **only this repository**.
+
+Open your GitHub **Settings -> Developer settings -> Personal access tokens ->
+Fine-grained tokens -> Generate new token**. Do not choose Tokens (classic).
+
+For the author's repository, this
+[pre-filled one-day token form](https://github.com/settings/personal-access-tokens/new?name=ghcp-demo-19-live-proof&target_name=xavierxmorris&expires_in=1&actions=write&contents=write&issues=write&pull_requests=write&metadata=read)
+sets the name, resource owner, expiration and permission suggestions. A fork
+owner must use their own resource owner. **The link does not select a repository.**
+
+| Creation field | Value |
+| --- | --- |
+| Token name | `ghcp-demo-19-live-proof` |
+| Expiration | 1 day |
+| Resource owner | The personal account that owns the demo |
+| Repository access | Only select repositories |
+| Selected repository | Only your demo repository, not all repositories |
+
 GitHub's documented issue-assignment permissions are:
 
 | Repository permission | Access |
@@ -85,6 +102,11 @@ GitHub's documented issue-assignment permissions are:
 | Contents | Read and write |
 | Issues | Read and write |
 | Pull requests | Read and write |
+
+Leave unrelated administration, organization and account permissions unset.
+Click **Generate token**, copy its value, then store it as described below.
+The token-creation procedure and URL pre-fill fields are documented in
+[GitHub's PAT guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
 Use the shortest practical expiry and revoke after the exercise. A supported
 GitHub App **user access token** is another user-to-server option, but
@@ -140,16 +162,35 @@ Then:
 
 ```powershell
 python -m issue_agent observe --repository $Repository --issue ISSUE_NUMBER
-gh agent-task view --repo $Repository PR_NUMBER --json id,state,pullRequestUrl,createdAt,completedAt
+gh agent-task view SESSION_ID --repo $Repository --json id,state,pullRequestUrl,createdAt,completedAt
 ```
 
-Substitute actual issue and PR integers. `gh agent-task view` requires a linked
-session; do not invent a task ID when one is not yet available.
+Substitute the actual issue integer and **session ID**, not the task ID or PR
+number. The observer discovers the task/session relationship using documented
+repository-scoped GET endpoints. It uses your existing local `gh` login, not
+the Actions assignment secret. If that local login uses a fine-grained PAT,
+the observation endpoints separately require **Agent tasks: read** permission;
+do not broaden the stored assignment token just to perform local observation.
+
+GitHub CLI 2.93.0 rejects PR selectors without an interactive terminal with
+`session ID is required when not running interactively`. Supplying a verified
+session UUID works; pretending a task UUID is a session UUID does not.
 
 Retain the issue, workflow run, source identity, session, PR/head commit, actual
 checks, warnings, failures and manual corrections. If GitHub requires approval
 to run checks on an agent PR, inspect its complete diff first and approve only
 the intended trusted check run. That is not PR approval or permission to merge.
+
+The standard fork workflow-run approval REST endpoint did **not** approve this
+demo's Copilot PR run: it returned HTTP 403, stating the run was not from a fork
+or queued by the Actions bot. Use the documented PR UI, not repeated API calls,
+broader tokens, a privileged trigger, or a manual-dispatch workaround.
+
+GitHub separately documents an administrator opt-in under **Settings -> Copilot
+-> Cloud agent -> Actions workflow approval -> Require approval for workflow
+runs**. Disabling it can expose unreviewed code to workflow write permissions or
+secrets. This proof leaves that policy unchanged. See the
+[enterprise design](ENTERPRISE-CI-DESIGN.md) before considering automatic CI.
 
 Inspect the exact [acceptance contract](ACCEPTANCE.md). Do not merge, activate
 the draft, run Jenkins, execute the draft, publish or deploy.

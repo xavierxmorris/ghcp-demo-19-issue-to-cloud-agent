@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .contracts import ContractError, Json, assignment_payload, issue_body
+from .contracts import ContractError, Json, assignment_payload, issue_body, object_value, string_value
 from .service import Evidence
 
 
@@ -31,11 +31,42 @@ def write_json(path: Path, value: Json) -> None:
         stream.write(json.dumps(value, indent=2, ensure_ascii=True) + "\n")
 
 
+def verify_bundle(directory: Path) -> None:
+    if directory.is_symlink():
+        raise ContractError("Evidence bundle cannot be a symbolic link")
+    manifest_path = directory / "bundle-manifest.json"
+    if not manifest_path.is_file() or manifest_path.is_symlink():
+        raise ContractError("Evidence manifest must be a regular file")
+    try:
+        manifest = object_value(
+            json.loads(manifest_path.read_text(encoding="utf-8")), "bundle manifest",
+        )
+    except json.JSONDecodeError:
+        raise ContractError("Evidence manifest is not valid JSON") from None
+    if type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1:
+        raise ContractError("Unsupported evidence manifest version")
+    hashes = object_value(manifest.get("sha256"), "manifest.sha256")
+    actual = {path.name for path in directory.iterdir()}
+    if not hashes or actual != set(hashes) | {"bundle-manifest.json"}:
+        raise ContractError("Evidence bundle has missing or unexpected artifacts")
+    for name, digest in hashes.items():
+        path = directory / name
+        if not path.is_file() or path.is_symlink():
+            raise ContractError("Evidence artifacts must be regular files")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != string_value(digest, "artifact hash"):
+            raise ContractError(f"Evidence artifact changed: {name}")
+
+
 def write_bundle(directory: Path, evidence: Evidence) -> None:
     data = evidence.json()
     data["schema_version"] = 1
     data["recorded_at"] = datetime.now(timezone.utc).isoformat()
-    data["model"] = "platform default; actual model not observed by this controller"
+    models = sorted({
+        value for record in evidence.pull_requests
+        if isinstance(value := record.get("model"), str) and value
+    })
+    data["model_selection"] = "platform default; no override requested"
+    data["model"] = ", ".join(models) if models else "not observed"
     write_json(directory / "report.json", data)
     lines = [
         "# Synthetic issue-to-agent evidence", "",
@@ -50,6 +81,7 @@ def write_bundle(directory: Path, evidence: Evidence) -> None:
         f"- Assignment attempted: {evidence.assignment_attempted}",
         f"- Assignment verified: {evidence.assignment_verified}",
         f"- Agent execution observed: {evidence.agent_execution_observed}",
+        f"- Observed model: {data['model']}",
         "- Migrated pipeline definitions: 0 / 1 (no acceptance or cutover performed)",
         f"- Mutations: {', '.join(evidence.mutations) or 'none'}",
         "", "Assignment, execution, a pull request, validation, acceptance and cutover",

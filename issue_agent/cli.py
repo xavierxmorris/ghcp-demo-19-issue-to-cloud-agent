@@ -15,7 +15,7 @@ from .contracts import (
     object_value, parse_body, positive_integer, repository_name, string_value,
 )
 from .evidence import reserve_output, write_bundle
-from .github_api import ApiError, GhApi, RestApi, gh_json, paginated, redact
+from .github_api import ApiError, GhApi, RestApi, paginated, redact, task_session_for_pull
 from .service import Evidence, read_issue, root, safe_run_url, start_from_event, submit_request
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,30 +74,48 @@ def observe(repository: str, number: int, evidence: Evidence) -> None:
             continue
         seen.add(pr_number)
         pr = object_value(api.request("GET", f"{root(repository)}/pulls/{pr_number}"), "pull request")
-        session = object_value(gh_json([
-            "agent-task", "view", "--repo", repository, str(pr_number),
-            "--json", "id,state,createdAt,updatedAt,completedAt,pullRequestUrl",
-        ]), "agent session")
         expected_url = f"https://github.com/{repository}/pull/{pr_number}"
-        if pr.get("html_url") != expected_url or session.get("pullRequestUrl") != expected_url:
-            raise ContractError("Agent session and linked pull request identities disagree")
-        state = string_value(session.get("state"), "session.state")
-        session_id = string_value(session.get("id"), "session.id")
-        if not session_id:
-            raise ContractError("Agent session identifier is empty")
-        evidence.pull_requests.append({
+        if pr.get("html_url") != expected_url:
+            raise ContractError("Linked pull request identity does not match the selected repository")
+        record: dict[str, Json] = {
             "url": expected_url,
             "draft": pr.get("draft"),
             "merged": pr.get("merged"),
             "head_commit": object_value(pr.get("head"), "PR head").get("sha"),
-            "session_id": session_id,
-            "session_state": state,
-            "session_created_at": session.get("createdAt"),
-            "session_completed_at": session.get("completedAt"),
-        })
-        evidence.agent_execution_observed |= state.lower() in {
-            "in_progress", "completed", "idle", "waiting_for_user",
         }
+        evidence.pull_requests.append(record)
+        task, session = task_session_for_pull(
+            api, repository, positive_integer(pr.get("id"), "pull request database id"),
+        )
+        task_id = string_value(task.get("id"), "task.id")
+        record.update({
+            "task_id": task_id,
+            "task_url": f"https://github.com/{repository}/tasks/{task_id}",
+            "task_state": string_value(task.get("state"), "task.state"),
+            "session_count": task.get("session_count"),
+        })
+        if session is not None:
+            state = string_value(session.get("state"), "session.state")
+            model = session.get("model")
+            if model is not None:
+                string_value(model, "session.model")
+            record.update({
+                "session_id": session.get("id"),
+                "session_state": state,
+                "session_created_at": session.get("created_at"),
+                "session_completed_at": session.get("completed_at"),
+                "model": model,
+            })
+            if session.get("error") is not None:
+                error = object_value(session["error"], "session.error")
+                message = error.get("message")
+                record["session_error"] = (
+                    redact(string_value(message, "session.error.message"))
+                    if message is not None else "GitHub reported an error without a message"
+                )
+            evidence.agent_execution_observed |= state.lower() in {
+                "in_progress", "completed", "idle", "waiting_for_user",
+            }
     if evidence.pull_requests:
         evidence.state = "agent-execution-observed" if evidence.agent_execution_observed else "linked-pr-observed"
 
@@ -169,7 +187,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         if evidence is not None:
             evidence.error = message
-            if evidence.state not in {"assignment-uncertain", "assignment-verified", "issue-creation-uncertain"}:
+            if args.command == "observe":
+                evidence.state = "observation-failed"
+            elif evidence.state not in {"assignment-uncertain", "assignment-verified", "issue-creation-uncertain"}:
                 evidence.state = "blocked"
             if bundle is not None and not (bundle / "report.json").exists():
                 write_bundle(bundle, evidence)

@@ -98,6 +98,7 @@ issues and rerun their original runs deliberately. No throughput claim is made.
 
 Responses are capped at 2 MiB; the event at 1 MiB; source/request text at 4 KiB.
 Issue/timeline reads stop at ten pages of 100 and fail instead of truncating.
+The observer also bounds each active/archived task listing to ten pages of 100.
 Requests have deadlines. Redirects away from the selected API endpoint are
 refused. HTTPS is not disabled and the API host is fixed to `api.github.com`.
 
@@ -110,9 +111,12 @@ without the Copilot assignee is a failure.
 
 There is no server-side transaction spanning issue text, comments, branch
 identity, labels and assignment. Re-reading narrows but does not eliminate the
-check/use window. A public issue can receive a comment after the final check;
-the cloud agent may see that context. Repository instructions forbid expanding
-the task from comments, but those instructions are not a security sandbox.
+check/use window. GitHub documents that comments from users without repository
+write access are not presented to the agent. Input from write-authorized actors
+and repository content can still be untrusted or misleading. This PoC's
+zero-comment rule is intentionally stricter than that platform filter.
+Repository instructions forbid expanding the task from comments, but are not
+an authorization sandbox.
 
 Use a private, appropriately governed target for any non-synthetic workload.
 Do not generalize this public owner-only proof into an arbitrary contributor
@@ -127,7 +131,16 @@ attempts; review and stop an in-flight session separately through GitHub.
 Every attempt writes a fresh token-free bundle; a hash manifest is written last.
 The record separates request creation, assignment attempt, assignment
 confirmation, observed agent execution, linked PR and human acceptance.
-The controller does not know the model actually selected by GitHub.
+The assignment controller does not select or know the eventual model. The
+read-only observer records it only when the actual session API exposes it.
+Prompts, usage/billing payloads and other sessions' source content are not
+included in the curated observation.
+
+The observer uses the documented repository-scoped Agent Tasks **GET** API.
+It binds a task's pull artifact to the PR database ID, verifies the detail
+response and session ownership, and records separate task/session identifiers.
+Ambiguous tasks or incomplete session evidence fail explicitly while retaining
+the already observed PR facts. There is no direct Agent Tasks creation path.
 
 The denominator is one synthetic **pipeline definition**, not an estate or a
 repository migration percentage. Assignment or a PR leaves the accepted count
@@ -146,3 +159,5 @@ Portfolio/custom-property discovery, import readiness, exact/near/no-match
 shared-workflow assessment, Maven-to-Gradle conversion, action quarantine/mirrors,
 private registries, OIDC/Vault, artifact provenance and bounded overnight waves
 are separate reviewed extensions. See [coverage](SOURCE-CONTEXT.md).
+The [enterprise design](ENTERPRISE-CI-DESIGN.md) describes a recommended
+bank-scale separation, not an implementation or compliance approval.

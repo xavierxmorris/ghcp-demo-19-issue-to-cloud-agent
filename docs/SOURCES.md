@@ -9,16 +9,21 @@ again before another live demonstration.
 | Source | What was verified |
 | --- | --- |
 | [Copilot cloud agent API](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/use-cloud-agent-via-the-api) | User-to-server authentication, suggestedActors availability check, REST issue assignment, target/base/instructions fields and fine-grained token permissions |
+| [Agent Tasks REST API](https://docs.github.com/en/rest/agent-tasks/agent-tasks) | Repository-scoped task lists, pagination/archive filters, pull artifact identity, session/model fields and separate read permission; observer uses GET only |
+| [Fine-grained PAT creation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) | One-day `expires_in` pre-fill, permission parameters, explicit repository selection and revocation |
 | [Issue assignees API](https://docs.github.com/en/rest/issues/assignees#add-assignees-to-an-issue) | Adding an assignee; HTTP success is not enough because unauthorized assignments can be ignored |
 | [Triggering a workflow](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow) | Issue events from GITHUB_TOKEN generally do not start a second workflow; user/App identities can |
 | [Copilot session entry points](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/start-copilot-sessions) | Separate issue, CLI, API and automation entry points |
 | [Copilot from GitHub CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/use-cloud-agent-from-cli) | Actual session observation, not local CLI model execution |
-| [GitHub CLI v2.93.0 session JSON](https://github.com/cli/cli/blob/v2.93.0/pkg/cmd/agent-task/capi/sessions.go) and [view tests](https://github.com/cli/cli/blob/v2.93.0/pkg/cmd/agent-task/view/view_test.go) | Exact exported field names, single-object view output, and observed state strings used by the read-only observer |
+| [GitHub CLI v2.93.0 session JSON](https://github.com/cli/cli/blob/v2.93.0/pkg/cmd/agent-task/capi/sessions.go), [view command](https://github.com/cli/cli/blob/v2.93.0/pkg/cmd/agent-task/view/view.go), and [view tests](https://github.com/cli/cli/blob/v2.93.0/pkg/cmd/agent-task/view/view_test.go) | JSON shape and the actual non-interactive session-ID requirement; live failure prompted replacing PR-selector observation with scoped REST reads |
 | [Native Copilot Automations](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/create-automations) | Automations require private/internal repositories; not selected for this public demo |
 | [Configure the agent environment](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/customize-the-agent-environment) | Default-branch setup file, exact copilot-setup-steps job name, supported settings and setup-failure caveat |
 | [GitHub issue-form schema](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema) | Input/dropdown/checkbox schema; explanatory Markdown is not submitted as issue body |
 | [Environment REST API](https://docs.github.com/en/rest/deployments/environments#create-or-update-an-environment) | Main-only environment setup is real configuration, not an implication of its YAML name |
 | [Environment branch policy API](https://docs.github.com/en/rest/deployments/branch-policies#create-a-deployment-branch-policy) | Exact main branch policy, distinct from a tag and from a reviewer rule |
+| [Review Copilot output](https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/review-copilot-output) | Default human CI-run approval and separate independent PR review |
+| [Copilot agent settings](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/configuring-agent-settings) | Repository-administrator auto-run opt-in and its explicit write/secret warning |
+| [Organization runner policy](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/administer-copilot/manage-for-organization/configure-runner-for-coding-agent) | Labeled group/runner defaults and disabling repository runner overrides; not the CI-approval switch |
 
 Context7's GitHub REST documentation collection was resolved and queried to
 cross-check API discovery. The first-party Copilot procedure, not a generic
@@ -82,3 +87,8 @@ in full. No source or tool-access failure is converted into a success claim.
 No document proves that a particular user has the required entitlement, that a
 secret has been installed, that a cloud task ran, or that an enterprise policy
 was enforced. Those facts need separate observed evidence.
+
+The [dated live proof](../iteration/2026-10-01-live-proof.md) records what actually
+happened here, including the CLI observation failure and the workflow-approval
+API's HTTP 403. The [enterprise design](ENTERPRISE-CI-DESIGN.md) contains the
+additional runner, network and governance sources for the bank-scale discussion.

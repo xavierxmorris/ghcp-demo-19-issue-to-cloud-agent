@@ -16,6 +16,7 @@ from issue_agent.contracts import (  # noqa: E402
     CONSENT, HARNESS_WORKFLOWS, PROPOSAL_FILES, ContractError, check_source,
     commit_sha, validate_draft, validate_review,
 )
+from issue_agent.evidence import verify_bundle  # noqa: E402
 
 REQUIRED = (
     "README.md", "AGENTS.md", "RUN-SHEET.md", "WORKSHOP.md", "PROMPTS.md",
@@ -111,6 +112,8 @@ def check(root: Path, require_draft: bool = False) -> None:
             if clean and not (path.parent / clean).exists():
                 raise ContractError(f"Broken local Markdown target in {relative}: {target}")
     validate_proposal(root, require_draft)
+    for manifest in (root / "iteration").rglob("bundle-manifest.json"):
+        verify_bundle(manifest.parent)
 
 
 def main() -> int:

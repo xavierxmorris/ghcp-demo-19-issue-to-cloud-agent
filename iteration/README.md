@@ -9,11 +9,15 @@ Local/hosted validation and live issue/session/PR observations are recorded
 separately, with exact revisions and links when available.
 
 The [authoring observation](2026-10-01-authoring.md) records the actual local
-checks, first-run failures and fixes, fresh preview, and disabled GitHub setup.
-Live setup still requires the approved narrow user token. No live assignment,
-agent execution, migration acceptance or cutover should be inferred until a
-separate dated observation records it.
+checks, first-run failures and fixes, fresh preview, and initial disabled setup.
+
+The [live proof](2026-10-01-live-proof.md) records the real unassigned issue,
+successful assignment, completed task/session, inactive draft PR, no-op rerun,
+observer failure and fix, hosted CI approval boundary, and credential cleanup.
+Five complete token-free bundles preserve both failed and successful evidence.
+No migration acceptance, merge, activation or cutover is claimed.
 
 Fresh attempt bundles go under ignored `out`, with a final integrity manifest.
-Copy only reviewed, token-free facts here. The cloud workflow's artifact
+Copy only reviewed, token-free facts here. `check_repo.py` verifies retained
+bundle hashes and exact artifact sets. The cloud workflow's artifact
 retention is seven days; an issue or label is not a permanent audit archive.

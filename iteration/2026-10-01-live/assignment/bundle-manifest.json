@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "sha256": {
+    "assignment-request.json": "edc2e1877e9b2ffe8ed0587fd7a2f5114a16b3362043eee8790bac941235e30e",
+    "issue-body.md": "5cc63bf9a68171571b38876bf627d76a0ac81f65fdd9b2862ff5d7112242cd1a",
+    "report.json": "dd5fd24f72d3b53fdd6f5db2a7779214b0cd0494ea9c0d96b4e9cee32e898c99",
+    "report.md": "c95e0e94a319b794db200214de927c3f2c2b57a70be748c3a00b4e1d8827c023"
+  }
+}

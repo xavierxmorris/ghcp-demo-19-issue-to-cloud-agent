@@ -1,0 +1,27 @@
+{
+  "mode": "trigger",
+  "repository": "xavierxmorris/ghcp-demo-19-issue-to-cloud-agent",
+  "state": "assignment-verified",
+  "source_commit": "cc2ce2f21397f45c4b38fad704378152408521a8",
+  "source_commit_is_fixture": false,
+  "controller_commit": "cc2ce2f21397f45c4b38fad704378152408521a8",
+  "source_sha256": "dba88eedd823cf62db9136941f91fb37bddd40898e7c1baeef8eb66c5d43a54f",
+  "issue_number": 2,
+  "issue_url": "https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/issues/2",
+  "workflow_run_url": "https://github.com/xavierxmorris/ghcp-demo-19-issue-to-cloud-agent/actions/runs/36795695019",
+  "assignment_attempted": true,
+  "assignment_verified": true,
+  "agent_execution_observed": false,
+  "selected_pipeline_definitions": 1,
+  "migrated_pipeline_definitions": 0,
+  "mutations": [
+    "durable-start-marker",
+    "copilot-assignment",
+    "assigned-label"
+  ],
+  "pull_requests": [],
+  "error": null,
+  "schema_version": 1,
+  "recorded_at": "2026-10-01T00:20:49.626586+00:00",
+  "model": "platform default; actual model not observed by this controller"
+}
